@@ -1,0 +1,28 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local buildRagdoll = require(ReplicatedStorage:WaitForChild("buildRagdoll"))
+
+local function characterAdded(player, character)
+	player.CharacterAppearanceLoaded:Wait()
+	wait(0.1)
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	buildRagdoll(humanoid)
+end
+
+local function playerAdded(player)
+	player.CharacterAdded:Connect(function(character)
+		characterAdded(player, character)
+	end)
+
+	if player.Character then
+		characterAdded(player, player.Character)
+	end
+end
+
+Players.PlayerAdded:Connect(playerAdded)
+
+for _,player in pairs(Players:GetPlayers()) do
+	playerAdded(player)
+end
