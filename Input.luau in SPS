@@ -1,0 +1,42 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local isRagdolled = false
+local lastToggle = 0
+local COOLDOWN = 0.5
+
+local function toggleRagdoll()
+	local character = player.Character
+	if not character then return end
+
+	local humanoid = character:FindFirstChild("Humanoid")
+	local animate = character:FindFirstChild("Animate")
+	if not humanoid or not animate then return end
+
+	isRagdolled = not isRagdolled
+
+	if isRagdolled then
+		humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+		animate.Disabled = true
+
+		for _,v in pairs(humanoid:GetPlayingAnimationTracks()) do
+			v:Stop(0)
+		end
+	else
+		humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		animate.Disabled = false
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+
+	if input.KeyCode == Enum.KeyCode.Q then
+		local now = tick()
+		if now - lastToggle < COOLDOWN then return end
+
+		lastToggle = now
+		toggleRagdoll()
+	end
+end)
